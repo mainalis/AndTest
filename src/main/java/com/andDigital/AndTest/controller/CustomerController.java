@@ -1,51 +1,56 @@
 package com.andDigital.AndTest.controller;
 
-import andDigital.model.Customer;
-import andDigital.model.CustomerPhone;
-import andDigital.model.Person;
-import andDigital.model.Phone;
 
+import com.andDigital.AndTest.Exception.ResourceNotFoundException;
+import com.andDigital.AndTest.Util;
+import com.andDigital.AndTest.model.CustomerPhone;
+import com.andDigital.AndTest.model.Phone;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+//  http://localhost:8080/api/v1/phoneNumbers
+
+@RestController
+@RequestMapping("api/v1")
 public class CustomerController {
 
-    public static void main(String... args) {
-        init();
-    }
+   @GetMapping("/getAllPhoneNumbers")
+    public List<Phone> getAllPhoneNumbers() {
+       return Util.phoneRepo;
+   }
 
-    public static void init() {
-        List<Person> customerRepo = new ArrayList();
-        List<Phone> phoneRepo= new ArrayList();
-        List<CustomerPhone> customerPhoneRep = new ArrayList();
+   @GetMapping("/phoneNumber/{id}")
+   public List<Phone> getPhoneNumberByPersonId(@PathVariable(value = "id") int userId) {
 
-        for(int i=0; i < 10; i++) {
-            Person tempPerson = new Customer( i +1, getRandomName(10), getRandomName(10), i+1);
-            Phone tempPhone = new Phone( i +1, getPhoneNumber());
-            CustomerPhone tempCustomerPhone = new CustomerPhone(tempPerson.getPersonId(), tempPhone.getPhoneId());
-            customerRepo.add(tempPerson);
-            phoneRepo.add(tempPhone);
-            customerPhoneRep.add(tempCustomerPhone);
-        }
+       List<Phone> matchedPhone = new ArrayList();
+       List<CustomerPhone> customerPhoneList = Util.customerPhoneRep.stream().filter(item -> item.getCustomerId() == userId).collect(Collectors.toList());
 
-        customerRepo.stream().forEach(item-> {
-            System.out.println("item " + item);
-        });
-    }
+       for(CustomerPhone customerPhone : customerPhoneList) {
+           Optional<Phone> matchedPhoneOptional = Util.phoneRepo.stream().filter(phone -> phone.getPhoneId() == customerPhone.getPhoneId()).findAny();
+           if(matchedPhoneOptional.isPresent()) {
+               matchedPhone.add(matchedPhoneOptional.get());
+           }
 
-    public static String getRandomName(int lengthOfStr) {
+       }
 
-        return new Random().ints(48,123)
-                .filter(i -> (i < 58) || (i > 64 && i < 91) || (i > 96))
-                .limit(lengthOfStr)
-                .collect(StringBuilder::new, (sb, i) -> sb.append((char) i), StringBuilder::append).toString();
-    }
+       return matchedPhone;
+   }
 
-    public static long getPhoneNumber() {
-        long[] phoneArray = new long []{ 7700_900007L,7700_900170L,7700_900549L, 7700_900680L, 7700_900491L, 7700_900849L, 7700_900170L, 7700_900680L, 7700_900491L, 7700_900941L, 7700_800491L};
-        int index = new Random().nextInt(11);
-        return phoneArray[index];
-    }
+   @PutMapping("/acivatePhoneNumber/{id}")
+    public ResponseEntity<Phone> acitivatePhoneNumber(@PathVariable(value = "id") int phoneId) throws ResourceNotFoundException {
+       Optional<Phone> phoneOptional = Util.phoneRepo.stream().filter(phone -> phone.getPhoneId() == phoneId).findAny();
+       if(phoneOptional.isPresent()) {
+           phoneOptional.get().setActiveStatus(true);
+           return ResponseEntity.ok(phoneOptional.get());
+       } else {
+           throw new ResourceNotFoundException("Phone number not found");
+       }
+
+   }
+
 }
