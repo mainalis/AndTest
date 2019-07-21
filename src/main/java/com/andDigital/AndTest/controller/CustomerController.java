@@ -13,17 +13,28 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-//  http://localhost:8080/api/v1/phoneNumbers
+//  http://localhost:8080/api/v1/getAllPhoneNumbers
+
+//
 
 @RestController
 @RequestMapping("api/v1")
 public class CustomerController {
 
+    /**
+     * Function for returning all phone number from database
+     * @return
+     */
    @GetMapping("/getAllPhoneNumbers")
     public List<Phone> getAllPhoneNumbers() {
        return Util.phoneRepo;
    }
 
+    /**
+     * Function for getting phone number of selected user
+     * @param userId
+     * @return
+     */
    @GetMapping("/phoneNumber/{id}")
    public List<Phone> getPhoneNumberByPersonId(@PathVariable(value = "id") int userId) {
 
@@ -41,8 +52,15 @@ public class CustomerController {
        return matchedPhone;
    }
 
-   @PutMapping("/acivatePhoneNumber/{id}")
-    public ResponseEntity<Phone> acitivatePhoneNumber(@PathVariable(value = "id") int phoneId) throws ResourceNotFoundException {
+    /**
+     * Function for activating phone nimber
+     * @param phoneId desired phone number
+     * @return success or failure status
+     * @throws ResourceNotFoundException
+     */
+
+   @PutMapping("/activatePhoneNumber/{id}")
+    public ResponseEntity<Phone> activatePhoneNumber(@PathVariable(value = "id") int phoneId) throws ResourceNotFoundException {
        Optional<Phone> phoneOptional = Util.phoneRepo.stream().filter(phone -> phone.getPhoneId() == phoneId).findAny();
        if(phoneOptional.isPresent()) {
            phoneOptional.get().setActiveStatus(true);

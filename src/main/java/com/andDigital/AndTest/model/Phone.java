@@ -15,6 +15,14 @@ public class Phone {
         this.phoneNumber = phoneNumber;
     }
 
+//    public Phone(int phoneId, boolean activeStatus, long phoneNumber, LocalDateTime contractStart, LocalDateTime contractEnd) {
+//        this.phoneId = phoneId;
+//        this.activeStatus = activeStatus;
+//        this.phoneNumber = phoneNumber;
+//        this.contractStart = contractStart;
+//        this.contractEnd = contractEnd;
+//    }
+
     public int getPhoneId() {
         return phoneId;
     }
